@@ -10,6 +10,10 @@ abstract class ILocalDataSource{
 
   Future<List<UserModel>> getAllUsers();
   Future<int> addUser({required UserModel userDetails});
+  Future<UserModel?> getUserByID({required int id});
+  Future<void> updateUserDetails({required UserModel userDetails});
+  Future<void> deleteUserByID({required int id});
+  Future<void> deleteAllUsers();
 
 }
 
@@ -25,6 +29,30 @@ class LocalDataSource extends ILocalDataSource{
   @override
   Future<int> addUser({required UserModel userDetails}) async {
     final response = await localClient.addUser(userDetails: userDetails);
+    return response;
+  }
+
+  @override
+  Future<UserModel?> getUserByID({required int id}) async {
+    final response = await localClient.getUserByID(id: id);
+    return response;
+  }
+
+  @override
+  Future<void> updateUserDetails({required UserModel userDetails}) async {
+    final response = await localClient.updateUserDetails(userDetails: userDetails);
+    return response;
+  }
+
+  @override
+  Future<void> deleteUserByID({required int id}) async {
+    final response = await localClient.deleteUserByID(id: id);
+    return response;
+  }
+
+  @override
+  Future<void> deleteAllUsers() async {
+    final response = await localClient.deleteAllUsers();
     return response;
   }
 }
