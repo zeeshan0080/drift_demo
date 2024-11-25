@@ -1,4 +1,6 @@
 
+import 'package:drift/drift.dart';
+import 'package:drift_demo/source/core/database/local_database.dart';
 import 'package:drift_demo/source/core/local_client.dart';
 
 import '../models/user_model.dart';
@@ -22,37 +24,58 @@ class LocalDataSource extends ILocalDataSource{
 
   @override
   Future<List<UserModel>> getAllUsers() async {
-    final response = await localClient.getAllUsers();
-    return response;
+    final response = await localClient.getAllRecords<UserLocal>(table: localClient.db.userLocalModel);
+    return response.map((item) => UserModel.fromLocal(item)).toList();
   }
 
   @override
   Future<int> addUser({required UserModel userDetails}) async {
-    final response = await localClient.addUser(userDetails: userDetails);
+    final data = UserLocalModelCompanion.insert(
+      firstName: Value(userDetails.firstName),
+      lastName: Value(userDetails.lastName),
+      email: Value(userDetails.email),
+      age: Value(userDetails.age),
+      isVerified: Value(userDetails.isVerified!),
+    );
+    final response = await localClient.addRecord(table: localClient.db.userLocalModel, userDetails: data);
     return response;
   }
 
   @override
   Future<UserModel?> getUserByID({required int id}) async {
-    final response = await localClient.getUserByID(id: id);
-    return response;
+    return await localClient.getRecordByID<UserModel>(
+      table: localClient.db.userLocalModel,
+      condition: (tbl) => tbl.id.equals(id),
+      fromRow: (row) => UserModel.fromLocal(row),
+    );
   }
 
   @override
   Future<void> updateUserDetails({required UserModel userDetails}) async {
-    final response = await localClient.updateUserDetails(userDetails: userDetails);
-    return response;
+    return await localClient.updateRecord<UserModel>(
+      table: localClient.db.userLocalModel,
+      condition: (tbl) => tbl.id.equals(userDetails.id!),
+      dataMapper: (details) => UserLocalModelCompanion(
+        firstName: Value(details.firstName),
+        lastName: Value(details.lastName),
+        email: Value(details.email),
+        age: Value(details.age),
+        isVerified: Value(details.isVerified ?? false),
+      ),
+      details: userDetails,
+    );
   }
 
   @override
   Future<void> deleteUserByID({required int id}) async {
-    final response = await localClient.deleteUserByID(id: id);
-    return response;
+    return await localClient.deleteRecord<UserModel>(
+      table: localClient.db.userLocalModel,
+      condition: (tbl) => tbl.id.equals(id),
+    );
   }
 
   @override
   Future<void> deleteAllUsers() async {
-    final response = await localClient.deleteAllUsers();
-    return response;
+    return await localClient.deleteAllRecords(table: localClient.db.userLocalModel);
   }
 }

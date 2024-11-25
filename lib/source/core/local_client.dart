@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:drift_demo/source/core/database/tables/user_table.dart';
 
 import '../models/user_model.dart';
 import 'database/local_database.dart';
@@ -8,53 +9,50 @@ class LocalClient{
 
   LocalClient({required this.db});
   
-  Future<List<UserModel>> getAllUsers() async {
-    final users = await db.select(db.userLocalModel).get();
-    return users.map((item) => UserModel.fromLocal(item)).toList();
+  Future<List<T>> getAllRecords<T>({required TableInfo table}) async {
+    final records = await db.select(table).get();
+    return records.map((e) => e as T).toList();
   }
 
-  Future<UserModel?> getUserByID({required int id}) async {
-    final response = await (db.select(db.userLocalModel)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
-    if(response == null) return null;
-    return UserModel.fromLocal(response);
+  Future<T?> getRecordByID<T>({
+    required TableInfo table,
+    required Expression<bool> Function(dynamic tbl) condition,
+    required T Function(dynamic row) fromRow,
+  }) async {
+    final response = await (db.select(table)..where(condition)).getSingleOrNull();
+    if (response == null) return null;
+    return fromRow(response);
   }
 
-  Future<int> addUser({required UserModel userDetails}) async {
-    final response = await db.into(db.userLocalModel).insert(
+  Future<int> addRecord({required TableInfo table, required UserLocalModelCompanion userDetails}) async {
+    final response = await db.into(table).insert(
+        userDetails,
       mode: InsertMode.insertOrReplace,
-        UserLocalModelCompanion.insert(
-          firstName: Value(userDetails.firstName),
-          lastName: Value(userDetails.lastName),
-          email: Value(userDetails.email),
-          age: Value(userDetails.age),
-          isVerified: Value(userDetails.isVerified!),
-      )
     );
     return response;
   }
 
-  Future<void> updateUserDetails({required UserModel userDetails}) async {
-    final data = UserLocalModelCompanion(
-      firstName: Value(userDetails.firstName),
-      lastName: Value(userDetails.lastName),
-      email: Value(userDetails.email),
-      age: Value(userDetails.age),
-      isVerified: Value(userDetails.isVerified??false),
-    );
-    final response = await (db.update(db.userLocalModel)..where((tbl) => tbl.id.equals(userDetails.id!))).write(data);
-    print("User record updated: $response");
-    return;
+  Future<void> updateRecord<T>({
+    required TableInfo table,
+    required Expression<bool> Function(dynamic tbl) condition,
+    required UpdateCompanion Function(T details) dataMapper,
+    required T details,
+  }) async {
+    final data = dataMapper(details);
+    final response = await (db.update(table)..where(condition)).write(data);
+    print("Record updated: $response");
   }
 
-  Future<void> deleteUserByID({required int id}) async {
-    final count = await (db.delete(db.userLocalModel)..where((tbl) => tbl.id.equals(id))).go();
-    print("User records deleted: $count");
-    return;
+  Future<void> deleteRecord<T>({
+    required TableInfo table,
+    required Expression<bool> Function(dynamic tbl) condition,
+  }) async {
+    final count = await (db.delete(table)..where(condition)).go();
+    print("Records deleted: $count");
   }
 
-  Future<void> deleteAllUsers() async {
-    final count = await db.delete(db.userLocalModel).go();
-    print("All Users deleted: $count");
-    return;
+  Future<void> deleteAllRecords({required TableInfo table}) async {
+    final count = await db.delete(table).go();
+    print("All records deleted from ${table.actualTableName}: $count");
   }
 }
