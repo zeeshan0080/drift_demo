@@ -14,7 +14,7 @@ class LocalClient{
     return records.map((e) => e as T).toList();
   }
 
-  Future<T?> getRecordByID<T>({
+  Future<T?> getRecordByCondition<T>({
     required TableInfo table,
     required Expression<bool> Function(dynamic tbl) condition,
     required T Function(dynamic row) fromRow,
@@ -24,11 +24,14 @@ class LocalClient{
     return fromRow(response);
   }
 
-  Future<int> addRecord({required TableInfo table, required UserLocalModelCompanion userDetails}) async {
-    final response = await db.into(table).insert(
-        userDetails,
-      mode: InsertMode.insertOrReplace,
-    );
+  Future<int> addRecord<T>({
+    required TableInfo table,
+    required Insertable Function(T details) dataMapper,
+    required T details,
+  }) async {
+    final data = dataMapper(details);
+    final response = await db.into(table).insert(data);
+    print("New record added with ID: $response");
     return response;
   }
 

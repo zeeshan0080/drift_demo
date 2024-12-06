@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    Future.microtask(()=> _authProvider.getAllUsers(context));
+    Future.microtask(()=> _authProvider.getAllAttachments());
     super.initState();
   }
 
@@ -72,27 +72,47 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authState, child) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Users: ${authState.users.length}',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'attachments: ${authState.localAttachments.length}',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18
+                      ),
                     ),
-                  ),
-                ],
-              )
-            ],
+                  ],
+                ),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: List.generate(authState.localAttachments.length, (index){
+                    final details = authState.localAttachments[index];
+                    return Column(
+                      children: [
+                        Image.memory(details.attachment!, height: 100, width: 100),
+                        Text("size: ${(details.size!.toStringAsFixed(2))}kb"),
+                        Text("t ID: ${details.type}"),
+                        Text("t ID: ${details.id}"),
+                        Text("a ID: ${details.attachmentId}"),
+                      ],
+                    );
+                  }),
+                )
+              ],
+            ),
           );
         }
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: addUser,
+        onPressed: () async {
+          await _authProvider.addAttachments();
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

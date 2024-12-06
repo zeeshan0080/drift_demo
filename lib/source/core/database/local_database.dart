@@ -1,11 +1,12 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import 'tables/attachment_table.dart';
 import 'tables/user_table.dart';
 
 part 'local_database.g.dart';
 
-@DriftDatabase(tables: [UserLocalModel])
+@DriftDatabase(tables: [UserLocalModel, AttachmentLocalModel])
 class LocalDatabase extends _$LocalDatabase{
 
   LocalDatabase() : super(_openConnection());
