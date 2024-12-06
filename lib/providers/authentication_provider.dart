@@ -69,7 +69,7 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     try {
       final response = await http.get(Uri.parse("https://dummyjson.com/image/4000x4000?type=png&text=I+am+a+png+image"));
-      for(int i=1; i <= 100; i++){
+      for(int i=1; i <= 80; i++){
         if(response.statusCode == 200){
           print("res: $i -> ${response.statusCode}");
           final attachmentDetails = AttachmentModel(

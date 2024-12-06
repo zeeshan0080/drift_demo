@@ -8,6 +8,9 @@ import 'dependency_inject.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setup();
+  final imageCache = PaintingBinding.instance.imageCache;
+  imageCache.maximumSize = 200; // Maximum number of images
+  imageCache.maximumSizeBytes = 500 * 1024 * 1024;
   runApp(MyApp());
 }
 
@@ -72,40 +75,54 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authState, child) {
-          return SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'attachments: ${authState.localAttachments.length}',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18
-                      ),
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'attachments: ${authState.localAttachments.length}',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18
                     ),
-                  ],
-                ),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: List.generate(authState.localAttachments.length, (index){
+                  ),
+                ],
+              ),
+              Expanded(
+                child: GridView.builder(
+                  itemCount: authState.localAttachments.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3, // Number of columns
+                    crossAxisSpacing: 8.0, // Space between columns
+                    mainAxisSpacing: 8.0, // Space between rows
+                    childAspectRatio: 0.9
+                  ),
+                  itemBuilder: (_, index){
                     final details = authState.localAttachments[index];
-                    return Column(
-                      children: [
-                        Image.memory(details.attachment!, height: 100, width: 100),
-                        Text("size: ${(details.size!.toStringAsFixed(2))}kb"),
-                        Text("t ID: ${details.type}"),
-                        Text("t ID: ${details.id}"),
-                        Text("a ID: ${details.attachmentId}"),
-                      ],
-                    );
-                  }),
-                )
-              ],
-            ),
+                    return Image.memory(details.attachment!,filterQuality: FilterQuality.low,);
+                  }
+                ),
+              ),
+              if(false)
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: List.generate(authState.localAttachments.length, (index){
+                  final details = authState.localAttachments[index];
+                  return Column(
+                    children: [
+                      Image.memory(details.attachment!, height: 100, width: 100),
+                      Text("size: ${(details.size!.toStringAsFixed(2))}kb"),
+                      Text("t ID: ${details.type}"),
+                      Text("t ID: ${details.id}"),
+                      Text("a ID: ${details.attachmentId}"),
+                    ],
+                  );
+                }),
+              )
+            ],
           );
         }
       ),
