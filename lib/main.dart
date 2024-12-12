@@ -150,7 +150,8 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           //await _authProvider.addAttachments();
-          getImage();
+          //getImage();
+          _authProvider.downloadFile("https://dummyjson.com/image/400x400?type=png&text=I+am+a+png+image", "test1.png");
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

@@ -2,7 +2,11 @@
 import 'package:drift_demo/source/models/attachment_model.dart';
 import 'package:drift_demo/source/repository/authentication_repository.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+//import 'dart:html' as html;
+
+//import 'package:drift_demo/conditional.dart';
 
 import '../source/models/user_model.dart';
 
@@ -61,6 +65,23 @@ class AuthProvider with ChangeNotifier {
     }
     notifyListeners();
     return;
+  }
+
+  Future<void> downloadFile(String url, String fileName) async {
+    final http.Response response = await http.get(Uri.parse(url));
+    if (kIsWeb) {
+      // Web download
+      /*final blob = html.Blob([response.bodyBytes], 'application/octet-stream');
+      print("type: ${blob.type}");
+      final urlBlob = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: urlBlob)
+        ..target = 'blank'
+        ..download = fileName
+        ..click();
+      html.Url.revokeObjectUrl(urlBlob);*/
+    }else{
+
+    }
   }
 
   Future addAttachments() async {
