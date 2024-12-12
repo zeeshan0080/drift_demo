@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:drift_demo/providers/authentication_provider.dart';
 import 'package:drift_demo/source/models/user_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import 'dependency_inject.dart';
@@ -47,6 +51,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _authProvider = sl<AuthProvider>();
+  dynamic _uploadImage;
 
   Future<void> addUser() async {
     final user = UserModel(
@@ -62,8 +67,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    Future.microtask(()=> _authProvider.getAllAttachments());
+    //Future.microtask(()=> _authProvider.getAllAttachments());
     super.initState();
+  }
+
+  getImage() async {
+    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if(image != null){
+      if(kIsWeb){
+        _uploadImage = image;
+      }else{
+        _uploadImage = File(image.path);
+      }
+      setState(() {});
+    }
   }
 
   @override
@@ -78,12 +95,16 @@ class _MyHomePageState extends State<MyHomePage> {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              if(_uploadImage != null && kIsWeb)
+                Image.network(_uploadImage.path)
+              else if(_uploadImage != null)
+                Image.file(_uploadImage),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'attachments: ${authState.localAttachments.length}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.black,
                       fontSize: 18
                     ),
@@ -128,7 +149,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await _authProvider.addAttachments();
+          //await _authProvider.addAttachments();
+          getImage();
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
