@@ -151,7 +151,10 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: () async {
           //await _authProvider.addAttachments();
           //getImage();
-          _authProvider.downloadFile("https://dummyjson.com/image/400x400?type=png&text=I+am+a+png+image", "test1.png");
+          //_authProvider.downloadFile("https://dummyjson.com/image/400x400?type=png&text=I+am+a+png+image", "test1.png");
+          //_authProvider.downloadFile("https://www.wisdomaxis.com/technology/software/data/for-reports/Orders-With-Nulls.xlsx", "export.xlsx");
+          //_authProvider.downloadFile("https://www.sample-videos.com/xls/Sample-Spreadsheet-100-rows.xls", "export.xls");
+          _authProvider.downloadFile("https://filesamples.com/samples/document/xlsx/sample3.xlsx", "export.xlsx");
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

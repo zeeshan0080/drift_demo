@@ -4,9 +4,12 @@ import 'package:drift_demo/source/repository/authentication_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-//import 'dart:html' as html;
+import 'package:path/path.dart' as path;
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:universal_html/html.dart';
+import 'dart:io' as io;
 
-//import 'package:drift_demo/conditional.dart';
 
 import '../source/models/user_model.dart';
 
@@ -67,22 +70,46 @@ class AuthProvider with ChangeNotifier {
     return;
   }
 
+  ///export implementation start
+  final iosTypes = {
+    ".pdf": "application/pdf",
+    ".png": "public.png",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".xls": "com.microsoft.excel.xls",
+  };
+  final androidTypes = {
+    ".pdf": "application/pdf",
+    ".png": "image/png",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".xls": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  };
+
   Future<void> downloadFile(String url, String fileName) async {
+    print("downloading...");
+    ///request should be made through repository with return type of Uint8List
     final http.Response response = await http.get(Uri.parse(url));
+
     if (kIsWeb) {
       // Web download
-      /*final blob = html.Blob([response.bodyBytes], 'application/octet-stream');
+      final blob = Blob([response.bodyBytes], 'application/octet-stream');
       print("type: ${blob.type}");
-      final urlBlob = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement(href: urlBlob)
+      final urlBlob = Url.createObjectUrlFromBlob(blob);
+      final anchor = AnchorElement(href: urlBlob)
         ..target = 'blank'
         ..download = fileName
         ..click();
-      html.Url.revokeObjectUrl(urlBlob);*/
+      Url.revokeObjectUrl(urlBlob);
     }else{
-
+      final dir = await getApplicationCacheDirectory();
+      io.File file = io.File("${dir.path}/$fileName");
+      await file.writeAsBytes(response.bodyBytes);
+      print("File: ${file.path}");
+      final extension = path.extension(file.path);
+      await OpenFile.open(file.path, type: io.Platform.isAndroid ? androidTypes[extension] : iosTypes[extension]);
     }
   }
+
+  ///export implementation end
 
   Future addAttachments() async {
     await deleteAllAttachments();
